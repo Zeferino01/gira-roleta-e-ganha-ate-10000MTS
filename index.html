@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roleta da Sorte MZN</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #fffdf4, #ffe6cc);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #d84315;
+      margin-top: 30px;
+      text-align: center;
+    }
+    .subtitle {
+      text-align: center;
+      color: #6d4c41;
+      margin: 5px 0 25px;
+      font-size: 16px;
+    }
+    .wheel-container {
+      position: relative;
+      width: 340px;
+      height: 340px;
+    }
+    .wheel {
+      border-radius: 50%;
+      border: 8px solid #ffffff;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+    .wheel canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+    .pointer {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-bottom: 28px solid #e91e63;
+      z-index: 10;
+    }
+    button {
+      margin-top: 20px;
+      padding: 14px 32px;
+      font-size: 17px;
+      font-weight: bold;
+      background: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      transition: 0.3s ease;
+    }
+    button:hover {
+      background: #1b5e20;
+    }
+    .share-box {
+      margin-top: 30px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #fff;
+      text-align: center;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    }
+    .share-box p {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: #388e3c;
+      font-weight: 500;
+    }
+    .whatsapp-btn {
+      background: #25d366;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .whatsapp-btn:hover {
+      background: #1ebc59;
+    }
+    .testimonials {
+      max-width: 360px;
+      margin: 30px auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .testimonials h3 {
+      margin-bottom: 20px;
+      color: #2e7d32;
+      font-size: 18px;
+    }
+    .testimonial-list {
+      position: relative;
+      height: 120px;
+    }
+    .testimonial {
+      position: absolute;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      width: 100%;
+      justify-content: center;
+    }
+    .testimonial.active {
+      opacity: 1;
+    }
+    .testimonial img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .testimonial p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #444;
+    }
+    .testimonial strong {
+      font-size: 14px;
+      color: #111;
+    }
+    .floating-whatsapp {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.3s;
+    }
+    .floating-whatsapp:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title">🎉 Gire e ganhe até 10.000 MZN!</div>
+  <div class="subtitle">💰 Gire até ganhar! Prêmios reais todos os dias!</div>
+
+  <div class="wheel-container">
+    <div class="pointer"></div>
+    <div class="wheel" id="wheel">
+      <canvas id="canvas" width="340" height="340"></canvas>
+    </div>
+  </div>
+
+  <button onclick="spin()">🎯 GIRAR AGORA</button>
+
+  <div class="share-box">
+    <p>📢 Compartilhe com amigos e ganhe até <strong>2.000MT</strong> em bônus!</p>
+    <a class="whatsapp-btn"
+       href="#"
+       id="whatsapp-link"
+       target="_blank">Compartilhar no WhatsApp</a>
+  </div>
+
+  <div class="testimonials">
+    <h3>📢 Ganhos Reais de Moçambique</h3>
+    <div class="testimonial-list" id="testimonial-carousel">
+      <!-- Testemunhos -->
+      <div class="testimonial active">
+        <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Ernesto">
+        <div><strong>Ernesto M., Maputo</strong><p>“Recebi 1000MZN após confirmar meu número. A roleta é real e paga mesmo!”</p></div>
+      </div>
+      <div class="testimonial">
+        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Nilza">
+        <div><strong>Nilza J., Beira</strong><p>“Joguei 2 vezes e ganhei 500MZN direto no meu eMola. Muito obrigado!”</p></div>
+      </div>
+      <div class="testimonial">
+        <img src="https://randomuser.me/api/portraits/men/63.jpg" alt="Arlindo">
+        <div><strong>Arlindo S., Nampula</strong><p>“Confirmei com 100MT e recebi 2000MZN. Nunca imaginei ganhar tão fácil!”</p></div>
+      </div>
+      <div class="testimonial">
+        <img src="https://randomuser.me/api/portraits/women/62.jpg" alt="Filomena">
+        <div><strong>Filomena C., Tete</strong><p>“Fiz o depósito e ganhei meu prêmio 4500Mzn logo no mesmo dia. Super confiável!”</p></div>
+      </div>
+      <div class="testimonial">
+        <img src="https://randomuser.me/api/portraits/men/15.jpg" alt="Tomás">
+        <div><strong>Tomás B., Inhambane</strong><p>“Girei e ganhei! Transferência feita direto na minha conta.”</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botão flutuante do grupo WhatsApp -->
+  <a href="https://chat.whatsapp.com/Fi1QPkZufqUEJU8sVWad1S?mode=ac_t"
+     class="floating-whatsapp"
+     target="_blank"
+     title="Entrar no grupo WhatsApp">
+    <img src="https://img.icons8.com/color/48/000000/whatsapp--v1.png" alt="Grupo WhatsApp">
+  </a>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const wheel = document.getElementById("wheel");
+
+    const prizes = [0, 100, 500, 1000, 2000, 10000, 0, 50];
+    const colors = ["#F44336", "#4CAF50", "#FFC107", "#2196F3", "#9C27B0", "#009688", "#FF5722", "#3F51B5"];
+    const total = prizes.length;
+    const angle = 360 / total;
+
+    let isSpinning = false;
+
+    const audioSpin = new Audio("https://cdn.pixabay.com/download/audio/2022/03/16/audio_497e4b496a.mp3");
+    const audioWin = new Audio("https://cdn.pixabay.com/download/audio/2022/03/16/audio_e7c1ee0dc8.mp3");
+    const audioLose = new Audio("https://cdn.pixabay.com/download/audio/2022/03/16/audio_63c65a48f4.mp3");
+
+    const currentUrl = encodeURIComponent(window.location.href);
+    document.getElementById("whatsapp-link").href =
+      `https://wa.me/?text=Jogue%20a%20Roleta%20da%20Sorte%20e%20ganhe%20dinheiro%20real!%20Tente%20aqui:%20${currentUrl}`;
+
+    function drawWheel() {
+      for (let i = 0; i < total; i++) {
+        const startAngle = (angle * i) * Math.PI / 180;
+        const endAngle = (angle * (i + 1)) * Math.PI / 180;
+
+        ctx.beginPath();
+        ctx.moveTo(170, 170);
+        ctx.arc(170, 170, 160, startAngle, endAngle);
+        ctx.fillStyle = colors[i];
+        ctx.fill();
+        ctx.save();
+
+        ctx.translate(170, 170);
+        ctx.rotate(startAngle + (endAngle - startAngle) / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 15px sans-serif";
+        ctx.fillText(prizes[i] + " MZN", 145, 5);
+        ctx.restore();
+      }
+    }
+
+    drawWheel();
+
+    function spin() {
+      if (isSpinning) return;
+
+      isSpinning = true;
+      audioSpin.play();
+
+      const randRotation = 3600 + Math.floor(Math.random() * 360);
+      wheel.style.transform = `rotate(${randRotation}deg)`;
+
+      setTimeout(() => {
+        const finalDeg = randRotation % 360;
+        const selectedIndex = Math.floor((360 - finalDeg + angle / 2) % 360 / angle);
+        const prize = prizes[selectedIndex];
+
+        if (prize > 0) {
+          audioWin.play();
+          confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+          Swal.fire({
+            title: '🎉 Parabéns!',
+            html: `
+              Você ganhou <strong>${prize} MZN</strong>!<br><br>
+              <strong>Como receber?</strong><br>
+              1. Crie sua conta oficial na Megagame.<br>
+              2. Faça um depósito mínimo de <b>10MT</b> para confirmar o número.<br>
+              3. Enviaremos seu valor imediatamente após verificação.
+            `,
+            icon: 'success',
+            confirmButtonText: 'Criar Conta Agora',
+            confirmButtonColor: '#00c853',
+            allowOutsideClick: false
+          }).then(result => {
+            if (result.isConfirmed) {
+              window.location.href = 'https://www.megagamelive.com/affiliates/?btag=2233419';
+            }
+          });
+
+        } else {
+          audioLose.play();
+          Swal.fire({
+            title: '😢 Que pena!',
+            text: 'Não foi dessa vez. Continue tentando!',
+            icon: 'info',
+            confirmButtonText: 'OK'
+          });
+        }
+
+        isSpinning = false;
+      }, 5200);
+    }
+
+    let testimonialIndex = 0;
+    const testimonials = document.querySelectorAll(".testimonial");
+
+    function showTestimonial(index) {
+      testimonials.forEach((el, i) => {
+        el.classList.toggle("active", i === index);
+      });
+    }
+
+    setInterval(() => {
+      testimonialIndex = (testimonialIndex + 1) % testimonials.length;
+      showTestimonial(testimonialIndex);
+    }, 4000);
+
+    showTestimonial(testimonialIndex);
+  </script>
+</body>
+</html>
